@@ -14,6 +14,7 @@ void main() async {
       title: "Airchat",
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
+      debugShowCheckedModeBanner: false,
       onInit: () {
         Get.put(AppController());
       },

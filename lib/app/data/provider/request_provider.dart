@@ -10,8 +10,7 @@ class RequestProvider {
   Future<RequestModel> getRequestForThisPassenger(
       PassengerModel passengerModel) async {
     final snap = await References.requestsRef
-        .where('passTicketNos',
-            arrayContains: _appController.passengerModel.ticketNo)
+        .where('passTicketNos', arrayContains: _appController.myTicketNo)
         .where('passTicketNos', arrayContains: passengerModel.ticketNo)
         .get();
     if (snap.docs.isEmpty) {
@@ -27,7 +26,18 @@ class RequestProvider {
     await References.requestsRef.doc(requestModel.id).set(requestModel.toMap());
   }
 
-  Future<void> updateRequest(RequestModel requestModel) async {
-    await References.requestsRef.doc(requestModel.id).set(requestModel.toMap());
+  Future<void> deleteRequest(RequestModel requestModel) async {
+    await References.requestsRef.doc(requestModel.id).delete();
+  }
+
+  Stream<List<RequestModel>> listenRequest() {
+    final stream = References.requestsRef
+        .where('passTicketNos',
+            arrayContains: _appController.passengerModel.ticketNo)
+        .snapshots();
+    return stream.map((snap) => snap.docs.map((doc) {
+          final req = RequestModel.fromMap(doc.data());
+          print(req);
+        }).toList());
   }
 }

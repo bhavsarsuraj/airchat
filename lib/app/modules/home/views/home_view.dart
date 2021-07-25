@@ -72,7 +72,7 @@ class HomeView extends GetView<HomeController> {
                   children: [
                     Flexible(
                       child: Text(
-                        passenger.name,
+                        passenger.name ?? '--',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -85,7 +85,7 @@ class HomeView extends GetView<HomeController> {
                     Flexible(
                       fit: FlexFit.tight,
                       child: Text(
-                        passenger.maskedTicketNo,
+                        passenger.maskedTicketNo ?? '--',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -96,7 +96,9 @@ class HomeView extends GetView<HomeController> {
                     SizedBox(
                       width: 8,
                     ),
-                    _getRequestStatusIcon(passenger),
+                    Obx(
+                      () => _getRequestStatusIcon(passenger),
+                    ),
                   ],
                 ),
                 SizedBox(
@@ -127,14 +129,7 @@ class HomeView extends GetView<HomeController> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
-                      'Tap to connect',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black.withOpacity(0.4),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    )
+                    Obx(() => _getRequestStatusText(passenger)),
                   ],
                 ),
               ],
@@ -145,10 +140,68 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  Widget _getRequestStatusText(PassengerModel passengerModel) {
+    switch (controller.getStatusOfRequest(passengerModel)) {
+      case RequestStatus.NotSent:
+        return Text(
+          'Tap to connect',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.black.withOpacity(0.4),
+            fontWeight: FontWeight.w500,
+          ),
+        );
+      case RequestStatus.Pending:
+        // Check if requester is Me
+        if (controller.isRequestedByMe(passengerModel)) {
+          // Requested By Me
+          return Text(
+            'Undo request',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.black.withOpacity(0.4),
+              fontWeight: FontWeight.w500,
+            ),
+          );
+        } else {
+          //Not Requested By Me
+          return Text(
+            '${passengerModel.name} has requested to connect',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.black.withOpacity(0.4),
+              fontWeight: FontWeight.w500,
+            ),
+          );
+        }
+        break;
+      case RequestStatus.Accepted:
+        return Text(
+          'Connected',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.black.withOpacity(0.4),
+            fontWeight: FontWeight.w500,
+          ),
+        );
+        break;
+      default:
+        return Text(
+          'Tap to connect',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.black.withOpacity(0.4),
+            fontWeight: FontWeight.w500,
+          ),
+        );
+    }
+  }
+
   Widget _getRequestStatusIcon(PassengerModel passengerModel) {
     switch (controller.getStatusOfRequest(passengerModel)) {
       case RequestStatus.NotSent:
         return GestureDetector(
+          onTap: () => controller.didTapRequest(passengerModel),
           child: Icon(Icons.add),
         );
       case RequestStatus.Pending:
@@ -156,6 +209,7 @@ class HomeView extends GetView<HomeController> {
         if (controller.isRequestedByMe(passengerModel)) {
           // Requested By Me
           return GestureDetector(
+            onTap: () => controller.undoRequest(passengerModel),
             child: Icon(Icons.undo),
           );
         } else {
@@ -163,10 +217,12 @@ class HomeView extends GetView<HomeController> {
           return Row(
             children: [
               GestureDetector(
+                onTap: () => controller.didTapRejectRequest(passengerModel),
                 child: Icon(Icons.person_remove),
               ),
               SizedBox(width: 8),
               GestureDetector(
+                onTap: () => controller.didTapAcceptRequest(passengerModel),
                 child: Icon(Icons.person_add),
               )
             ],
@@ -174,12 +230,11 @@ class HomeView extends GetView<HomeController> {
         }
         break;
       case RequestStatus.Accepted:
-        return GestureDetector(
-          child: Icon(Icons.verified),
-        );
+        return Icon(Icons.verified);
         break;
       default:
         return GestureDetector(
+          onTap: () => controller.didTapRequest(passengerModel),
           child: Icon(Icons.add),
         );
     }
