@@ -1,13 +1,23 @@
 class ChatModel {
   ChatModel({
-    required this.passengers,
+    this.id,
+    this.passTicketNos,
   });
 
-  List<String> passengers;
+  String id;
+  List<String> passTicketNos;
 
   factory ChatModel.fromMap(Map<String, dynamic> json) => ChatModel(
-        passengers: json["passengers"],
+        id: json["id"] == null ? null : json["id"],
+        passTicketNos: json["passTicketNos"] == null
+            ? null
+            : List<String>.from(json["passengers"].map((x) => x)),
       );
 
-  Map<String, dynamic> toMap() => {"passengers": passengers};
+  Map<String, dynamic> toMap() => {
+        "id": id == null ? null : id,
+        "passTicketNos": passTicketNos == null
+            ? null
+            : List<dynamic>.from(passTicketNos.map((x) => x)),
+      };
 }

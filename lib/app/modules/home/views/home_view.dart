@@ -1,62 +1,17 @@
 import 'package:airchat/app/data/models/passengerModel.dart';
+import 'package:airchat/app/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
-  final users = [
-    PassengerModel(
-        name: "Dheeraj",
-        ticketNo: "123456789123",
-        designation: "CEO",
-        company: "Infosys"),
-    PassengerModel(
-        name: "Suraj",
-        ticketNo: "123456775891",
-        designation: "System Engineer",
-        company: "TCS"),
-    PassengerModel(
-        name: "Ateek",
-        ticketNo: "123456785645",
-        designation: "UI Designer",
-        company: "Google"),
-    PassengerModel(
-        name: "Joyal",
-        ticketNo: "123456728454",
-        designation: "Senior Analyst",
-        company: "Squareboat Solutions"),
-    PassengerModel(
-        name: "Aman",
-        ticketNo: "123456748963",
-        designation: "Co-Founder",
-        company: "GeeksForGeeks"),
-    PassengerModel(
-        name: "Saransh",
-        ticketNo: "123456756555",
-        designation: "Power Programmer",
-        company: "Infosys"),
-    PassengerModel(
-        name: "Ayushraj",
-        ticketNo: "123456748763",
-        designation: "Digital Specialist Engineer",
-        company: "Infosys"),
-    PassengerModel(
-        name: "Saransh",
-        ticketNo: "123456732144",
-        designation: "Power Programmer",
-        company: "Infosys"),
-    PassengerModel(
-        name: "Ayushraj",
-        ticketNo: "123456748212",
-        designation: "Digital Specialist Engineer",
-        company: "Infosys"),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _buildBody(),
+      body: Obx(
+        () => _buildBody(),
+      ),
     );
   }
 
@@ -75,9 +30,9 @@ class HomeView extends GetView<HomeController> {
     return SafeArea(
       child: ListView.builder(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        itemCount: users.length,
+        itemCount: controller.passengersInVicinity.length,
         itemBuilder: (context, index) {
-          return _buildPassengerCard(users[index]);
+          return _buildPassengerCard(controller.passengersInVicinity[index]);
         },
       ),
     );
@@ -141,7 +96,7 @@ class HomeView extends GetView<HomeController> {
                     SizedBox(
                       width: 8,
                     ),
-                    Icon(Icons.add),
+                    _getRequestStatusIcon(passenger),
                   ],
                 ),
                 SizedBox(
@@ -190,7 +145,43 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  String getHiddenTicketNo(String ticketNo) {
-    return 'xxxxxxx' + ticketNo.substring(7, ticketNo.length);
+  Widget _getRequestStatusIcon(PassengerModel passengerModel) {
+    switch (controller.getStatusOfRequest(passengerModel)) {
+      case RequestStatus.NotSent:
+        return GestureDetector(
+          child: Icon(Icons.add),
+        );
+      case RequestStatus.Pending:
+        // Check if requester is Me
+        if (controller.isRequestedByMe(passengerModel)) {
+          // Requested By Me
+          return GestureDetector(
+            child: Icon(Icons.undo),
+          );
+        } else {
+          //Not Requested By Me
+          return Row(
+            children: [
+              GestureDetector(
+                child: Icon(Icons.person_remove),
+              ),
+              SizedBox(width: 8),
+              GestureDetector(
+                child: Icon(Icons.person_add),
+              )
+            ],
+          );
+        }
+        break;
+      case RequestStatus.Accepted:
+        return GestureDetector(
+          child: Icon(Icons.verified),
+        );
+        break;
+      default:
+        return GestureDetector(
+          child: Icon(Icons.add),
+        );
+    }
   }
 }

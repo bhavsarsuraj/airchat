@@ -1,31 +1,35 @@
 class RequestModel {
   RequestModel({
-    required this.id,
-    required this.requester,
-    required this.receiver,
-    required this.status,
-    required this.passengers,
+    this.id,
+    this.requester,
+    this.receiver,
+    this.isAccepted,
+    this.passTicketNos,
   });
 
   String id;
   String requester;
   String receiver;
-  String status;
-  List<String> passengers;
+  bool isAccepted;
+  List<String> passTicketNos;
 
   factory RequestModel.fromMap(Map<String, dynamic> json) => RequestModel(
-        id: json["id"],
-        requester: json["requester"],
-        receiver: json["receiver"],
-        status: json["status"],
-        passengers: json["passengers"],
+        id: json["id"] == null ? null : json["id"],
+        requester: json["requester"] == null ? null : json["requester"],
+        receiver: json["receiver"] == null ? null : json["receiver"],
+        isAccepted: json["isAccepted"] == null ? null : json["isAccepted"],
+        passTicketNos: json["passTicketNos"] == null
+            ? null
+            : List<String>.from(json["passengers"].map((x) => x)),
       );
 
   Map<String, dynamic> toMap() => {
-        "id": id,
-        "requester": requester,
-        "receiver": receiver,
-        "status": status,
-        "passengers": passengers,
+        "id": id == null ? null : id,
+        "requester": requester == null ? null : requester,
+        "receiver": receiver == null ? null : receiver,
+        "isAccepted": isAccepted == null ? null : isAccepted,
+        "passTicketNos": passTicketNos == null
+            ? null
+            : List<dynamic>.from(passTicketNos.map((x) => x)),
       };
 }

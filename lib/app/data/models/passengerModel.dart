@@ -1,7 +1,7 @@
 class PassengerModel {
   PassengerModel({
-    required this.name,
-    required this.ticketNo,
+    this.name,
+    this.ticketNo,
     this.designation,
     this.company,
   });
@@ -10,8 +10,8 @@ class PassengerModel {
 
   String name;
   String ticketNo;
-  String? designation;
-  String? company;
+  String designation;
+  String company;
 
   factory PassengerModel.fromMap(Map<String, dynamic> json) => PassengerModel(
         name: json["name"] == null ? null : json["name"],
@@ -21,8 +21,8 @@ class PassengerModel {
       );
 
   Map<String, dynamic> toMap() => {
-        "name": name,
-        "ticketNo": ticketNo,
+        "name": name == null ? null : name,
+        "ticketNo": ticketNo == null ? null : ticketNo,
         "designation": designation == null ? null : designation,
         "company": company == null ? null : company,
       };
