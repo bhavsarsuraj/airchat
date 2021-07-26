@@ -6,7 +6,7 @@ class MessageModel {
     this.id,
   });
 
-  String createdAt;
+  int createdAt;
   String createdBy;
   String message;
   String id;

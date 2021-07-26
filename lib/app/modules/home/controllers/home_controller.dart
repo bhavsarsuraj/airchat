@@ -1,7 +1,10 @@
+import 'package:airchat/app/data/models/chatModel.dart';
 import 'package:airchat/app/data/models/passengerModel.dart';
 import 'package:airchat/app/data/models/requestModel.dart';
+import 'package:airchat/app/data/repository/chat_repository.dart';
 import 'package:airchat/app/data/repository/passenger_repository.dart';
 import 'package:airchat/app/data/repository/request_repository.dart';
+import 'package:airchat/app/routes/app_pages.dart';
 import 'package:airchat/app/utils/enums.dart';
 import 'package:airchat/app/utils/firebase/references.dart';
 import 'package:airchat/app/utils/loading/loading_utils.dart';
@@ -13,10 +16,13 @@ class HomeController extends GetxController {
   final AppController _appController = Get.find();
   final _passengerRepository = PassengerRepository();
   final _requestRepository = RequestRepository();
+  final _chatRepository = ChatRepository();
 
   final passengersInVicinity = List<PassengerModel>.empty().obs;
 
   var _requestsMap = Map<String, RequestModel>().obs;
+
+  final _chatsMap = Map<String, ChatModel>().obs;
 
   @override
   void onInit() {
@@ -27,12 +33,10 @@ class HomeController extends GetxController {
   void configure() {
     getAllPassengersInVicinity();
     getRequestsMap();
+    getChatsMap();
   }
 
   void getRequestsMap() {
-    // _requestRepository.listenRequest().listen((requests) {
-    //   _updateMapFrom(requests);
-    // });
     References.requestsRef
         .where(
           'passTicketNos',
@@ -40,12 +44,39 @@ class HomeController extends GetxController {
         )
         .snapshots()
         .listen((snap) {
-      _updateMapFrom(
-          snap.docs.map((doc) => RequestModel.fromMap(doc.data())).toList());
+      _updateRequestsMapFrom(
+        snap.docs.map((doc) => RequestModel.fromMap(doc.data())).toList(),
+      );
     });
   }
 
-  void _updateMapFrom(List<RequestModel> requests) {
+  void getChatsMap() {
+    References.chatsRef
+        .where('passTicketNos', arrayContains: _appController.myTicketNo)
+        .snapshots()
+        .listen((snap) {
+      _updateChatsMapFrom(
+        snap.docs.map((doc) => ChatModel.fromMap(doc.data())).toList(),
+      );
+    });
+  }
+
+  void _updateChatsMapFrom(List<ChatModel> chats) {
+    final newMap = Map<String, ChatModel>();
+    chats.forEach((chat) {
+      // get other passenger
+      if (chat.passTicketNos.elementAt(0) == _appController.myTicketNo) {
+        // other passenger is at index 1
+        newMap[chat.passTicketNos.elementAt(1)] = chat;
+      } else {
+        // other passenger is at index 0
+        newMap[chat.passTicketNos.elementAt(0)] = chat;
+      }
+    });
+    _chatsMap.assignAll(newMap);
+  }
+
+  void _updateRequestsMapFrom(List<RequestModel> requests) {
     final newMap = Map<String, RequestModel>();
     requests.forEach((req) {
       // if receiver is me
@@ -103,8 +134,9 @@ class HomeController extends GetxController {
       LoadingUtils.dismissLoader();
       Get.showSnackbar(
         Snackbars.errorSnackBar(
-            message:
-                'Error occured while requesting ${receiver.name}. Please try again'),
+          message:
+              'Error occured while requesting ${receiver.name}. Please try again',
+        ),
       );
     }
   }
@@ -151,6 +183,43 @@ class HomeController extends GetxController {
       Get.showSnackbar(
         Snackbars.errorSnackBar(message: e),
       );
+    }
+  }
+
+  void didTapChat(PassengerModel passengerModel) async {
+    // Check if request exists or not
+    final req = _requestsMap[passengerModel.ticketNo];
+    if (req == null || !req.isAccepted) {
+      // request doesn't exist or not accepted => return
+      return;
+    } else {
+      // Request is accepted
+      // Firstly check if chat exists or not in the chats map
+      if (_chatsMap.containsKey(passengerModel.ticketNo)) {
+        // Chat exists, continue to chat screen
+        Get.toNamed(Routes.CHAT,
+            arguments: [_chatsMap[passengerModel.ticketNo], passengerModel]);
+      } else {
+        // Create a new chat and then proceed to chat screen
+        final chat = ChatModel(
+          id: References.chatsRef.doc().id,
+          passTicketNos: [_appController.myTicketNo, passengerModel.ticketNo],
+        );
+        try {
+          LoadingUtils.showLoader();
+          await _chatRepository.addChat(chat);
+          LoadingUtils.dismissLoader();
+          // proceed to chat screen
+          Get.toNamed(Routes.CHAT, arguments: [chat, passengerModel]);
+        } catch (e) {
+          LoadingUtils.dismissLoader();
+          Get.showSnackbar(
+            Snackbars.errorSnackBar(
+              message: 'Something went wrong. Please try again',
+            ),
+          );
+        }
+      }
     }
   }
 }

@@ -21,9 +21,6 @@ class RequestModel {
         passTicketNos: ((json["passTicketNos"] as List) ?? [])
             .map<String>((x) => x as String)
             .toList(),
-        // passTicketNos: json["passTicketNos"] == null
-        //     ? null
-        //     : List<String>.from(json["passengers"]?.map((x) => x)),
       );
 
   Map<String, dynamic> toMap() => {

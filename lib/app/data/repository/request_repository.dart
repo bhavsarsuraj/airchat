@@ -18,18 +18,6 @@ class RequestRepository {
     await _apiClient.deleteRequest(requestModel);
   }
 
-  // Future<void> deleteRequestOfThisPassenger(
-  //     PassengerModel passengerModel) async {
-  //   try {
-  //     final req = await _apiClient.getRequestForThisPassenger(passengerModel);
-  //     if (req != null) {
-  //       await _apiClient.deleteRequest(req);
-  //     }
-  //   } catch (e) {
-  //     throw 'Error rejecting request';
-  //   }
-  // }
-
   Stream<List<RequestModel>> listenRequest() {
     return _apiClient.listenRequest();
   }
