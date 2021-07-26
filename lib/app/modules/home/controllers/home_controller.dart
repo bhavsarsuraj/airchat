@@ -1,15 +1,28 @@
+import 'package:airchat/app/data/models/chatModel.dart';
 import 'package:airchat/app/data/models/passengerModel.dart';
 import 'package:airchat/app/data/models/requestModel.dart';
+import 'package:airchat/app/data/repository/chat_repository.dart';
 import 'package:airchat/app/data/repository/passenger_repository.dart';
+import 'package:airchat/app/data/repository/request_repository.dart';
+import 'package:airchat/app/routes/app_pages.dart';
 import 'package:airchat/app/utils/enums.dart';
+import 'package:airchat/app/utils/firebase/references.dart';
+import 'package:airchat/app/utils/loading/loading_utils.dart';
+import 'package:airchat/app/utils/widgets/snackbars.dart';
 import 'package:airchat/app_controller.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
   final AppController _appController = Get.find();
   final _passengerRepository = PassengerRepository();
+  final _requestRepository = RequestRepository();
+  final _chatRepository = ChatRepository();
+
   final passengersInVicinity = List<PassengerModel>.empty().obs;
-  var map = Map<String, RequestModel>();
+
+  var _requestsMap = Map<String, RequestModel>().obs;
+
+  final _chatsMap = Map<String, ChatModel>().obs;
 
   @override
   void onInit() {
@@ -19,6 +32,61 @@ class HomeController extends GetxController {
 
   void configure() {
     getAllPassengersInVicinity();
+    getRequestsMap();
+    getChatsMap();
+  }
+
+  void getRequestsMap() {
+    References.requestsRef
+        .where(
+          'passTicketNos',
+          arrayContains: _appController.passengerModel.ticketNo,
+        )
+        .snapshots()
+        .listen((snap) {
+      _updateRequestsMapFrom(
+        snap.docs.map((doc) => RequestModel.fromMap(doc.data())).toList(),
+      );
+    });
+  }
+
+  void getChatsMap() {
+    References.chatsRef
+        .where('passTicketNos', arrayContains: _appController.myTicketNo)
+        .snapshots()
+        .listen((snap) {
+      _updateChatsMapFrom(
+        snap.docs.map((doc) => ChatModel.fromMap(doc.data())).toList(),
+      );
+    });
+  }
+
+  void _updateChatsMapFrom(List<ChatModel> chats) {
+    final newMap = Map<String, ChatModel>();
+    chats.forEach((chat) {
+      // get other passenger
+      if (chat.passTicketNos.elementAt(0) == _appController.myTicketNo) {
+        // other passenger is at index 1
+        newMap[chat.passTicketNos.elementAt(1)] = chat;
+      } else {
+        // other passenger is at index 0
+        newMap[chat.passTicketNos.elementAt(0)] = chat;
+      }
+    });
+    _chatsMap.assignAll(newMap);
+  }
+
+  void _updateRequestsMapFrom(List<RequestModel> requests) {
+    final newMap = Map<String, RequestModel>();
+    requests.forEach((req) {
+      // if receiver is me
+      if (req.receiver == _appController.myTicketNo) {
+        newMap[req.requester] = req;
+      } else {
+        newMap[req.receiver] = req;
+      }
+    });
+    _requestsMap.assignAll(newMap);
   }
 
   void getAllPassengersInVicinity() {
@@ -28,11 +96,11 @@ class HomeController extends GetxController {
 
   RequestStatus getStatusOfRequest(PassengerModel passengerModel) {
     // check if requests exists or not
-    if (map.containsKey(passengerModel.ticketNo)) {
+    if (_requestsMap.containsKey(passengerModel.ticketNo)) {
       // Exists
-      // Get the req
-      final req = map[passengerModel.ticketNo];
-      return requestStatuses.map[req];
+      // Get the request
+      final req = _requestsMap[passengerModel.ticketNo];
+      return req.isAccepted ? RequestStatus.Accepted : RequestStatus.Pending;
     } else {
       // Not exists
       return RequestStatus.NotSent;
@@ -40,12 +108,118 @@ class HomeController extends GetxController {
   }
 
   bool isRequestedByMe(PassengerModel passengerModel) {
-    if (map.containsKey(passengerModel.ticketNo)) {
-      final req = map[passengerModel.ticketNo];
+    final req = _requestsMap[passengerModel.ticketNo];
+    if (req != null) {
       return req.requester == _appController.passengerModel.ticketNo;
     } else {
       // Default
       return false;
+    }
+  }
+
+  Future<void> didTapRequest(PassengerModel receiver) async {
+    try {
+      LoadingUtils.showLoader();
+      final request = RequestModel(
+        id: References.requestsRef.doc().id,
+        requester: _appController.myTicketNo,
+        receiver: receiver.ticketNo,
+        isAccepted: false,
+        passTicketNos: [_appController.myTicketNo, receiver.ticketNo],
+      );
+      // Add request
+      await _requestRepository.addRequest(request);
+      LoadingUtils.dismissLoader();
+    } catch (e) {
+      LoadingUtils.dismissLoader();
+      Get.showSnackbar(
+        Snackbars.errorSnackBar(
+          message:
+              'Error occured while requesting ${receiver.name}. Please try again',
+        ),
+      );
+    }
+  }
+
+  Future<void> didTapAcceptRequest(PassengerModel requester) async {
+    try {
+      LoadingUtils.showLoader();
+      // Get the request
+      final req = _requestsMap[requester.ticketNo];
+      req.isAccepted = true;
+      await _requestRepository.addRequest(req);
+      LoadingUtils.dismissLoader();
+    } catch (e) {
+      LoadingUtils.dismissLoader();
+      Get.showSnackbar(
+        Snackbars.errorSnackBar(
+            message: 'Error occured while accepting request. Please try again'),
+      );
+    }
+  }
+
+  Future<void> didTapRejectRequest(PassengerModel requester) async {
+    try {
+      LoadingUtils.showLoader();
+      final req = _requestsMap[requester.ticketNo];
+      await _requestRepository.deleteRequest(req);
+      LoadingUtils.dismissLoader();
+    } catch (e) {
+      LoadingUtils.dismissLoader();
+      Get.showSnackbar(
+        Snackbars.errorSnackBar(message: e),
+      );
+    }
+  }
+
+  Future<void> undoRequest(PassengerModel receiver) async {
+    try {
+      LoadingUtils.showLoader();
+      final req = _requestsMap[receiver.ticketNo];
+      await _requestRepository.deleteRequest(req);
+      LoadingUtils.dismissLoader();
+    } catch (e) {
+      LoadingUtils.dismissLoader();
+      Get.showSnackbar(
+        Snackbars.errorSnackBar(message: e),
+      );
+    }
+  }
+
+  void didTapChat(PassengerModel passengerModel) async {
+    // Check if request exists or not
+    final req = _requestsMap[passengerModel.ticketNo];
+    if (req == null || !req.isAccepted) {
+      // request doesn't exist or not accepted => return
+      return;
+    } else {
+      // Request is accepted
+      // Firstly check if chat exists or not in the chats map
+      if (_chatsMap.containsKey(passengerModel.ticketNo)) {
+        // Chat exists, continue to chat screen
+        Get.toNamed(Routes.CHAT,
+            arguments: [_chatsMap[passengerModel.ticketNo], passengerModel]);
+      } else {
+        // Create a new chat and then proceed to chat screen
+        final chat = ChatModel(
+          id: References.chatsRef.doc().id,
+          passTicketNos: [_appController.myTicketNo, passengerModel.ticketNo],
+        );
+        try {
+          LoadingUtils.showLoader();
+          await _chatRepository.addChat(chat);
+          LoadingUtils.dismissLoader();
+          // proceed to chat screen
+          Get.toNamed(Routes.CHAT, arguments: [chat, passengerModel]);
+        } catch (e) {
+          LoadingUtils.dismissLoader();
+          Get.showSnackbar(
+            Snackbars.errorSnackBar(
+              message: 'Something went wrong. Please try again',
+            ),
+          );
+        }
+      }
     }
   }
 }

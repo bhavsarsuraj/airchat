@@ -18,9 +18,9 @@ class RequestModel {
         requester: json["requester"] == null ? null : json["requester"],
         receiver: json["receiver"] == null ? null : json["receiver"],
         isAccepted: json["isAccepted"] == null ? null : json["isAccepted"],
-        passTicketNos: json["passTicketNos"] == null
-            ? null
-            : List<String>.from(json["passengers"].map((x) => x)),
+        passTicketNos: ((json["passTicketNos"] as List) ?? [])
+            .map<String>((x) => x as String)
+            .toList(),
       );
 
   Map<String, dynamic> toMap() => {
@@ -28,8 +28,6 @@ class RequestModel {
         "requester": requester == null ? null : requester,
         "receiver": receiver == null ? null : receiver,
         "isAccepted": isAccepted == null ? null : isAccepted,
-        "passTicketNos": passTicketNos == null
-            ? null
-            : List<dynamic>.from(passTicketNos.map((x) => x)),
+        "passTicketNos": passTicketNos ?? [],
       };
 }

@@ -14,6 +14,7 @@ void main() async {
       title: "Airchat",
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
+      debugShowCheckedModeBanner: false,
       onInit: () {
         Get.put(AppController());
       },
@@ -21,11 +22,6 @@ void main() async {
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          titleTextStyle: TextStyle(
-            color: Colors.black,
-            fontSize: 22,
-            fontWeight: FontWeight.w500,
-          ),
         ),
       ),
     ),

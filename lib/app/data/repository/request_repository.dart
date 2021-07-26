@@ -13,4 +13,12 @@ class RequestRepository {
   Future<void> addRequest(RequestModel requestModel) async {
     await _apiClient.addRequest(requestModel);
   }
+
+  Future<void> deleteRequest(RequestModel requestModel) async {
+    await _apiClient.deleteRequest(requestModel);
+  }
+
+  Stream<List<RequestModel>> listenRequest() {
+    return _apiClient.listenRequest();
+  }
 }

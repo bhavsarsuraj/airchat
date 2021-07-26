@@ -6,8 +6,5 @@ class AppController extends GetxController {
   set passengerModel(val) => _passengerModel.value = val;
   PassengerModel get passengerModel => _passengerModel.value;
 
-  @override
-  void onReady() {
-    super.onReady();
-  }
+  String get myTicketNo => passengerModel.ticketNo;
 }
