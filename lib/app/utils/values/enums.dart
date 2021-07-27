@@ -1,9 +1,11 @@
+import 'package:airchat/app/utils/values/strings.dart';
+
 enum RequestStatus { Pending, Accepted, NotSent }
 
 final requestStatuses = EnumValues({
-  'Pending': RequestStatus.Pending,
-  'Accepted': RequestStatus.Accepted,
-  'NotSent': RequestStatus.NotSent,
+  Strings.pending: RequestStatus.Pending,
+  Strings.accepted: RequestStatus.Accepted,
+  Strings.notSent: RequestStatus.NotSent,
 });
 
 class EnumValues<T> {

@@ -1,12 +1,13 @@
 import 'package:airchat/app/data/models/passengerModel.dart';
-import 'package:airchat/app/utils/enums.dart';
+import 'package:airchat/app/utils/values/enums.dart';
 import 'package:airchat/app/utils/values/images.dart';
+import 'package:airchat/app/utils/values/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
-  final _iconSize = 28.0;
+  final _iconSize = 26.0;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,7 @@ class HomeView extends GetView<HomeController> {
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: Text(
-        'Co-passengers in your vicinity',
+        Strings.coPassengersInYourVicinity,
         style: TextStyle(
           color: Colors.black,
         ),
@@ -79,7 +80,7 @@ class HomeView extends GetView<HomeController> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Flexible(
+                      Expanded(
                         child: Text(
                           passenger.name ?? '--',
                           maxLines: 1,
@@ -91,8 +92,7 @@ class HomeView extends GetView<HomeController> {
                       SizedBox(
                         width: 8,
                       ),
-                      Flexible(
-                        fit: FlexFit.tight,
+                      Expanded(
                         child: Text(
                           passenger.maskedTicketNo ?? '--',
                           style: TextStyle(
@@ -154,7 +154,7 @@ class HomeView extends GetView<HomeController> {
     switch (controller.getStatusOfRequest(passengerModel)) {
       case RequestStatus.NotSent:
         return Text(
-          'Tap to connect',
+          Strings.tapToConnect,
           style: TextStyle(
             fontSize: 12,
             color: Colors.black.withOpacity(0.4),
@@ -166,7 +166,7 @@ class HomeView extends GetView<HomeController> {
         if (controller.isRequestedByMe(passengerModel)) {
           // Requested By Me
           return Text(
-            'Undo request',
+            Strings.undo,
             style: TextStyle(
               fontSize: 12,
               color: Colors.black.withOpacity(0.4),
@@ -176,7 +176,7 @@ class HomeView extends GetView<HomeController> {
         } else {
           //Not Requested By Me
           return Text(
-            '${passengerModel.name} has requested to connect',
+            '${passengerModel.name} ${Strings.hasRequestedToConnect}',
             style: TextStyle(
               fontSize: 12,
               color: Colors.black.withOpacity(0.4),
@@ -187,7 +187,7 @@ class HomeView extends GetView<HomeController> {
         break;
       case RequestStatus.Accepted:
         return Text(
-          'Connected',
+          Strings.connected,
           style: TextStyle(
             fontSize: 12,
             color: Colors.black.withOpacity(0.4),
@@ -197,7 +197,7 @@ class HomeView extends GetView<HomeController> {
         break;
       default:
         return Text(
-          'Tap to connect',
+          Strings.tapToConnect,
           style: TextStyle(
             fontSize: 12,
             color: Colors.black.withOpacity(0.4),
@@ -237,19 +237,21 @@ class HomeView extends GetView<HomeController> {
             children: [
               GestureDetector(
                 onTap: () => controller.didTapRejectRequest(passengerModel),
-                child: Icon(
-                  Icons.person_remove_alt_1_outlined,
+                child: Image.asset(
+                  Images.rejectIcon,
                   color: Colors.red,
-                  size: _iconSize,
+                  height: _iconSize,
+                  width: _iconSize,
                 ),
               ),
-              SizedBox(width: 20),
+              SizedBox(width: 28),
               GestureDetector(
                 onTap: () => controller.didTapAcceptRequest(passengerModel),
-                child: Icon(
-                  Icons.person_add_alt_1_outlined,
-                  size: _iconSize,
+                child: Image.asset(
+                  Images.acceptIcon,
                   color: Colors.orangeAccent,
+                  height: _iconSize,
+                  width: _iconSize,
                 ),
               )
             ],

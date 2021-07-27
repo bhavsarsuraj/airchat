@@ -5,9 +5,10 @@ import 'package:airchat/app/data/repository/chat_repository.dart';
 import 'package:airchat/app/data/repository/passenger_repository.dart';
 import 'package:airchat/app/data/repository/request_repository.dart';
 import 'package:airchat/app/routes/app_pages.dart';
-import 'package:airchat/app/utils/enums.dart';
+import 'package:airchat/app/utils/values/enums.dart';
 import 'package:airchat/app/utils/firebase/references.dart';
 import 'package:airchat/app/utils/loading/loading_utils.dart';
+import 'package:airchat/app/utils/values/strings.dart';
 import 'package:airchat/app/utils/widgets/snackbars.dart';
 import 'package:airchat/app_controller.dart';
 import 'package:get/get.dart';
@@ -39,7 +40,7 @@ class HomeController extends GetxController {
   void getRequestsMap() {
     References.requestsRef
         .where(
-          'passTicketNos',
+          Strings.passTicketNos,
           arrayContains: _appController.passengerModel.ticketNo,
         )
         .snapshots()
@@ -52,7 +53,7 @@ class HomeController extends GetxController {
 
   void getChatsMap() {
     References.chatsRef
-        .where('passTicketNos', arrayContains: _appController.myTicketNo)
+        .where(Strings.passTicketNos, arrayContains: _appController.myTicketNo)
         .snapshots()
         .listen((snap) {
       _updateChatsMapFrom(
@@ -135,7 +136,7 @@ class HomeController extends GetxController {
       Get.showSnackbar(
         Snackbars.errorSnackBar(
           message:
-              'Error occured while requesting ${receiver.name}. Please try again',
+              '${ErrorStrings.errorRequesting} ${receiver.name}. ${ErrorStrings.pleaseTryAgain}',
         ),
       );
     }
@@ -152,8 +153,7 @@ class HomeController extends GetxController {
     } catch (e) {
       LoadingUtils.dismissLoader();
       Get.showSnackbar(
-        Snackbars.errorSnackBar(
-            message: 'Error occured while accepting request. Please try again'),
+        Snackbars.errorSnackBar(message: ErrorStrings.errorAcceptingRequest),
       );
     }
   }
@@ -215,7 +215,7 @@ class HomeController extends GetxController {
           LoadingUtils.dismissLoader();
           Get.showSnackbar(
             Snackbars.errorSnackBar(
-              message: 'Something went wrong. Please try again',
+              message: ErrorStrings.somethingWentWrong,
             ),
           );
         }
