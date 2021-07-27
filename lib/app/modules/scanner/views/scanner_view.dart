@@ -1,3 +1,4 @@
+import 'package:airchat/app/utils/values/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/scanner_controller.dart';
@@ -9,10 +10,13 @@ class ScannerView extends GetView<ScannerController> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Airchat',
-          style: TextStyle(color: Colors.black),
+          Strings.appTitle,
+          style: TextStyle(
+            color: Colors.red,
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        centerTitle: true,
       ),
       body: _buildBody(),
     );
@@ -21,18 +25,19 @@ class ScannerView extends GetView<ScannerController> {
   Widget _buildBody() {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Scan the barcode behind your ticket to chat with people in your vicinity!',
+              Strings.scanToConnectText,
               style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
+                fontSize: 18,
+                color: Colors.orangeAccent,
+                fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.center,
             ),
             SizedBox(height: 32),
             ElevatedButton(
@@ -54,7 +59,7 @@ class ScannerView extends GetView<ScannerController> {
                   ),
                   SizedBox(width: 16),
                   Text(
-                    'SCAN',
+                    Strings.scan,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,

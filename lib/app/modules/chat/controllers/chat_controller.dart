@@ -3,6 +3,7 @@ import 'package:airchat/app/data/models/messageModel.dart';
 import 'package:airchat/app/data/models/passengerModel.dart';
 import 'package:airchat/app/data/repository/chat_repository.dart';
 import 'package:airchat/app/utils/firebase/references.dart';
+import 'package:airchat/app/utils/values/strings.dart';
 import 'package:airchat/app/utils/widgets/snackbars.dart';
 import 'package:airchat/app_controller.dart';
 import 'package:flutter/material.dart';
@@ -47,8 +48,7 @@ class ChatController extends GetxController {
     } catch (e) {
       Get.showSnackbar(
         Snackbars.errorSnackBar(
-          message:
-              'Something went wrong while sending message!\nPlease try again.',
+          message: ErrorStrings.errorSendingMessage,
         ),
       );
     }

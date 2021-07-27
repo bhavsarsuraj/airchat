@@ -8,9 +8,9 @@ environment:
 dependencies: 
   cupertino_icons: ^1.0.2
   get: 4.2.4
-  qrscan: ^0.3.2
   cloud_firestore: ^2.4.0
   firebase_core: ^1.4.0
+  barcode_scan2: ^4.1.4 
 
   flutter: 
     sdk: flutter
@@ -23,3 +23,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+    

@@ -1,6 +1,7 @@
 import 'package:airchat/app/data/models/passengerModel.dart';
 import 'package:airchat/app/data/models/requestModel.dart';
 import 'package:airchat/app/utils/firebase/references.dart';
+import 'package:airchat/app/utils/values/strings.dart';
 import 'package:airchat/app_controller.dart';
 import 'package:get/get.dart';
 
@@ -10,8 +11,8 @@ class RequestProvider {
   Future<RequestModel> getRequestForThisPassenger(
       PassengerModel passengerModel) async {
     final snap = await References.requestsRef
-        .where('passTicketNos', arrayContains: _appController.myTicketNo)
-        .where('passTicketNos', arrayContains: passengerModel.ticketNo)
+        .where(Strings.passTicketNos, arrayContains: _appController.myTicketNo)
+        .where(Strings.passTicketNos, arrayContains: passengerModel.ticketNo)
         .get();
     if (snap.docs.isEmpty) {
       // No request exists between me and this passenger
@@ -28,16 +29,5 @@ class RequestProvider {
 
   Future<void> deleteRequest(RequestModel requestModel) async {
     await References.requestsRef.doc(requestModel.id).delete();
-  }
-
-  Stream<List<RequestModel>> listenRequest() {
-    final stream = References.requestsRef
-        .where('passTicketNos',
-            arrayContains: _appController.passengerModel.ticketNo)
-        .snapshots();
-    return stream.map((snap) => snap.docs.map((doc) {
-          final req = RequestModel.fromMap(doc.data());
-          print(req);
-        }).toList());
   }
 }

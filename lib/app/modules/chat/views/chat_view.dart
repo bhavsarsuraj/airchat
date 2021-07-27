@@ -1,10 +1,9 @@
 import 'package:airchat/app/data/models/messageModel.dart';
 import 'package:airchat/app/utils/values/images.dart';
+import 'package:airchat/app/utils/values/strings.dart';
 import 'package:airchat/app_controller.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
-
 import '../controllers/chat_controller.dart';
 
 class ChatView extends GetView<ChatController> {
@@ -208,7 +207,7 @@ class ChatView extends GetView<ChatController> {
                 borderSide: BorderSide(color: Colors.black54),
                 borderRadius: BorderRadius.circular(20),
               ),
-              hintText: 'Tap to type',
+              hintText: Strings.tapToType,
               hintStyle: TextStyle(
                 color: Colors.grey,
                 fontSize: 14,
