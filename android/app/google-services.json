@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "34006183668",
+    "project_id": "airchat-fa2ab",
+    "storage_bucket": "airchat-fa2ab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:34006183668:android:9ab14264cde2abd67878a1",
+        "android_client_info": {
+          "package_name": "in.airindia.airchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "34006183668-6hmjsqg9dficg8j56d3k7qufr18tcmbl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwHbsWJaZIwJos12tEjn9YtTA_ySnbheM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "34006183668-6hmjsqg9dficg8j56d3k7qufr18tcmbl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

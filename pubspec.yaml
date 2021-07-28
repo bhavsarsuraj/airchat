@@ -3,18 +3,40 @@ version: 1.0.0+1
 publish_to: none
 description: A new Flutter project.
 environment: 
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies: 
   cupertino_icons: ^1.0.2
   get: 4.2.4
+  cloud_firestore: ^2.4.0
+  firebase_core: ^1.4.0
+  barcode_scan2: ^4.1.4 
+
   flutter: 
     sdk: flutter
 
 dev_dependencies: 
   flutter_test: 
     sdk: flutter
+  flutter_native_splash: ^1.2.0
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  color_dark: "#000000"
+  image: "assets/images/splash.png"
+  android: true
+  ios: true
+  android_gravity: center
+  ios_content_mode: center
+  web_image_mode: center
+
 
 flutter: 
   uses-material-design: true
+  assets:
+    - assets/icons/
+    - assets/images/
+    
+
+# splash screen
 
