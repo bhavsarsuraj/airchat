@@ -95,6 +95,12 @@ class ChatView extends GetView<ChatController> {
             ],
           ),
         ),
+        SizedBox(
+          width: 12,
+        ),
+        Obx(
+          () => _getBlockStatus(),
+        ),
       ],
     );
   }
@@ -115,7 +121,7 @@ class ChatView extends GetView<ChatController> {
             ),
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: EdgeInsets.symmetric(vertical: 6),
                 itemCount: controller.messages.length,
                 itemBuilder: (context, index) {
                   return Obx(() => _getMessageView(controller.messages[index]));
@@ -123,8 +129,9 @@ class ChatView extends GetView<ChatController> {
                 reverse: true,
               ),
             ),
+            Obx(() => _buildBlockText()),
             SizedBox(height: 6),
-            _buildTextField(),
+            Obx(() => _buildTextField()),
           ],
         ),
       ),
@@ -138,91 +145,214 @@ class ChatView extends GetView<ChatController> {
   }
 
   Widget _buildMyMessageView(MessageModel messageModel) {
-    return Row(
-      children: [
-        Spacer(),
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 4),
-          padding: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orangeAccent, width: 1.0),
-          ),
-          child: Text(
-            messageModel.message,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.orangeAccent,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          SizedBox(width: 50),
+          Flexible(
+            child: Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange, width: 1.0),
+              ),
+              child: Text(
+                messageModel.message,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.orange,
+                ),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildOtherMessageView(MessageModel messageModel) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Image.asset(
-          Images.passengerIcon,
-          height: _iconSize,
-          width: _iconSize,
-        ),
-        SizedBox(width: 4),
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 4),
-          padding: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey, width: 1.0),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Image.asset(
+            Images.passengerIcon,
+            height: _iconSize,
+            width: _iconSize,
+            color: Colors.black54,
           ),
-          child: Text(
-            messageModel.message,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.black,
+          SizedBox(width: 4),
+          Flexible(
+            child: Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.black54, width: 1.0),
+              ),
+              child: Text(
+                messageModel.message,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
             ),
           ),
-        ),
-        Spacer(),
-      ],
+          SizedBox(width: 50),
+        ],
+      ),
     );
   }
 
   Widget _buildTextField() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: controller.messageController,
-            onEditingComplete: controller.didTapSendMessage,
-            textInputAction: TextInputAction.send,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey),
-                borderRadius: BorderRadius.circular(20),
+    return !controller.chat.isBlocked
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller.messageController,
+                  onEditingComplete: controller.didTapSendMessage,
+                  textInputAction: TextInputAction.send,
+                  decoration: InputDecoration(
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    hintText: Strings.tapToType,
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: TextStyle(fontSize: 18),
+                  minLines: 1,
+                  maxLines: 5,
+                ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.black54),
-                borderRadius: BorderRadius.circular(20),
+              SizedBox(width: 4),
+              GestureDetector(
+                onTap: () async {
+                  await controller.didTapSendMessage();
+                },
+                child: Container(
+                  padding: EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF128C7E),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.send,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
-              hintText: Strings.tapToType,
-              hintStyle: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
+            ],
+          )
+        : Container();
+  }
+
+  Widget _getBlockStatus() {
+    if (controller.chatModel.value.isBlocked) {
+      // Chat is Blocked
+      if (_isBlockedByMe()) {
+        // Blocked by me
+        return TextButton.icon(
+          onPressed: () async {
+            await controller.unblockUser();
+          },
+          icon: Icon(
+            Icons.lock_open_rounded,
+            color: Colors.red,
+          ),
+          label: Text(
+            Strings.unblock,
+            style: TextStyle(
+              color: Colors.black,
             ),
           ),
+        );
+      } else {
+        // I am blocked
+        return Image.asset(
+          Images.blockIcon,
+          height: _iconSize,
+          width: _iconSize,
+          color: Colors.red,
+        );
+      }
+    } else {
+      // Show the option to block the chat
+      return TextButton.icon(
+        onPressed: () async {
+          await controller.blockUser();
+        },
+        icon: Icon(
+          Icons.block,
+          color: Colors.red,
         ),
-        SizedBox(width: 12),
-        GestureDetector(
-          onTap: () async {
-            await controller.didTapSendMessage();
-          },
-          child: Icon(Icons.send),
+        label: Text(
+          Strings.block,
+          style: TextStyle(
+            color: Colors.black,
+          ),
         ),
-      ],
+      );
+    }
+  }
+
+  Widget _buildBlockText() {
+    if (!controller.chatModel.value.isBlocked) {
+      // Chat is unblocked
+      return Container();
+    } else {
+      // Chat is blocked
+      if (_isBlockedByMe()) {
+        return _blockedTextContainer(
+            Strings.youBlocked(controller.passengerModel.name));
+      } else {
+        return _blockedTextContainer(
+            Strings.youCantSendMessages(controller.passengerModel.name));
+      }
+    }
+  }
+
+  Widget _blockedTextContainer(String message) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.black12,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.red,
+          ),
+        ),
+      ),
     );
+  }
+
+  bool _isBlockedByMe() {
+    final isBlockedByMe =
+        controller.chatModel.value.blockedBy == _appController.myTicketNo;
+    return isBlockedByMe;
   }
 }

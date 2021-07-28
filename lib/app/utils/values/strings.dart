@@ -1,7 +1,8 @@
 class Strings {
   static final appTitle = 'Airchat';
   static final tapToConnect = 'Tap to connect';
-  static final hasRequestedToConnect = 'has requested to connect';
+  static String hasRequestedToConnect(String requester) =>
+      '$requester has requested to connect';
   static final connected = 'Connected';
   static final undo = 'Undo request';
   static final coPassengersInYourVicinity = 'Co-passengers in your vicinity';
@@ -16,6 +17,15 @@ class Strings {
   static final pending = 'Pending';
   static final accepted = 'Accepted';
   static final notSent = 'NotSent';
+  static final block = 'Block';
+  static final unblock = 'Unblock';
+  static final noPassengersInVicinity =
+      'There are no passengers available in your vicinity!';
+  // static final blocked = 'Blocked';
+  static String youBlocked(String user) =>
+      'You blocked $user. Tap the unblock button on the top right side to continue the chat!';
+  static String youCantSendMessages(String user) =>
+      'You can\'t send messages to $user anymore as you are blocked by $user.';
 }
 
 class ErrorStrings {
@@ -28,4 +38,8 @@ class ErrorStrings {
   static final somethingWentWrong = 'Something went wrong. Please try again';
   static final errorSendingMessage =
       'Something went wrong while sending message!\nPlease try again.';
+  static final errorBlocking =
+      'Something went wrong while blocking. Please try again.';
+  static final errorUnblocking =
+      'Something went wrong while unblocking. Please try again.';
 }

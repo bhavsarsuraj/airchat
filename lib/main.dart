@@ -29,7 +29,6 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      defaultTransition: Transition.fadeIn,
     );
   }
 }

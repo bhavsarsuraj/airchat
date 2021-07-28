@@ -19,11 +19,11 @@ class ScannerController extends GetxController {
   }
 
   void didTapScanButton() async {
-    LoadingUtils.showLoader();
     final scannedContent = await BarcodeScanner.scan();
     if (scannedContent.rawContent.isNotEmpty) {
       final json = scannedContent.rawContent;
       try {
+        LoadingUtils.showLoader();
         // Firstly, try to decode the scanned content into map.
         Map<String, dynamic> pass = jsonDecode(json);
 
@@ -32,7 +32,7 @@ class ScannerController extends GetxController {
 
         // set the passenger model in app controller
         _appController.passengerModel = passenger;
-        // set the passenger model to cloud firestore.
+        // set the passenger model in cloud firestore.
         await _passengerRepository.addPassenger(passenger);
 
         LoadingUtils.dismissLoader();
@@ -47,8 +47,6 @@ class ScannerController extends GetxController {
           ),
         );
       }
-    } else {
-      LoadingUtils.dismissLoader();
     }
   }
 }

@@ -6,4 +6,5 @@ class Images {
   static final undoIcon = _assetIconPath + 'undo_icon.png';
   static final acceptIcon = _assetIconPath + 'accept_icon.png';
   static final rejectIcon = _assetIconPath + 'reject_icon.png';
+  static final blockIcon = _assetIconPath + 'block_icon.png';
 }

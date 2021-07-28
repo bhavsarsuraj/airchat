@@ -32,13 +32,16 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildBody() {
     return SafeArea(
-      child: ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        itemCount: controller.passengersInVicinity.length,
-        itemBuilder: (context, index) {
-          return _buildPassengerCard(controller.passengersInVicinity[index]);
-        },
-      ),
+      child: controller.passengersInVicinity.isNotEmpty
+          ? ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              itemCount: controller.passengersInVicinity.length,
+              itemBuilder: (context, index) {
+                return _buildPassengerCard(
+                    controller.passengersInVicinity[index]);
+              },
+            )
+          : _buildEmptyPassengers(),
     );
   }
 
@@ -60,7 +63,6 @@ class HomeView extends GetView<HomeController> {
           ],
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.asset(
@@ -78,7 +80,7 @@ class HomeView extends GetView<HomeController> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Text(
@@ -176,7 +178,7 @@ class HomeView extends GetView<HomeController> {
         } else {
           //Not Requested By Me
           return Text(
-            '${passengerModel.name} ${Strings.hasRequestedToConnect}',
+            Strings.hasRequestedToConnect(passengerModel.name),
             style: TextStyle(
               fontSize: 12,
               color: Colors.black.withOpacity(0.4),
@@ -207,6 +209,19 @@ class HomeView extends GetView<HomeController> {
     }
   }
 
+  Widget _buildEmptyPassengers() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12),
+        child: Text(
+          Strings.noPassengersInVicinity,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
   Widget _getRequestStatusIcon(PassengerModel passengerModel) {
     switch (controller.getStatusOfRequest(passengerModel)) {
       case RequestStatus.NotSent:
@@ -219,7 +234,7 @@ class HomeView extends GetView<HomeController> {
           ),
         );
       case RequestStatus.Pending:
-        // Check if requester is Me
+        // Check if requester is me
         if (controller.isRequestedByMe(passengerModel)) {
           // Requested By Me
           return GestureDetector(

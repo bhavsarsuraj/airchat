@@ -197,12 +197,15 @@ class HomeController extends GetxController {
       // Firstly check if chat exists or not in the chats map
       if (_chatsMap.containsKey(passengerModel.ticketNo)) {
         // Chat exists, continue to chat screen
-        Get.toNamed(Routes.CHAT,
-            arguments: [_chatsMap[passengerModel.ticketNo], passengerModel]);
+        Get.toNamed(Routes.CHAT, arguments: [
+          Rx(_chatsMap[passengerModel.ticketNo]),
+          passengerModel
+        ]);
       } else {
         // Create a new chat and then proceed to chat screen
         final chat = ChatModel(
           id: References.chatsRef.doc().id,
+          isBlocked: false,
           passTicketNos: [_appController.myTicketNo, passengerModel.ticketNo],
         );
         try {
@@ -210,7 +213,7 @@ class HomeController extends GetxController {
           await _chatRepository.addChat(chat);
           LoadingUtils.dismissLoader();
           // proceed to chat screen
-          Get.toNamed(Routes.CHAT, arguments: [chat, passengerModel]);
+          Get.toNamed(Routes.CHAT, arguments: [Rx(chat), passengerModel]);
         } catch (e) {
           LoadingUtils.dismissLoader();
           Get.showSnackbar(
